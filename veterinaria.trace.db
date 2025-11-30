@@ -1,0 +1,3 @@
+2025-11-30 17:47:10.475949-03:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "ADOPCIONES" not found; SQL statement:
+SELECT * FROM adopciones WHERE empleado_id = ? ORDER BY fecha_hora DESC [42102-232]

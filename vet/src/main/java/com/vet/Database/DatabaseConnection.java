@@ -53,7 +53,15 @@ public class DatabaseConnection {
             stmt.execute(createEmpleadosTable);
 
             // Tabla de Adoptantes
-
+            String createAdoptantesTable = """
+                CREATE TABLE IF NOT EXISTS adoptantes (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    nombre VARCHAR(200) NOT NULL,
+                    edad INT NOT NULL,
+                    direccion VARCHAR(300) NOT NULL
+                )
+            """;
+            stmt.execute(createAdoptantesTable);
 
             // Tabla de Mascotas
             String createMascotasTable = """
@@ -68,7 +76,21 @@ public class DatabaseConnection {
             """;
             stmt.execute(createMascotasTable);
 
-
+            // Tabla de Adopciones
+            String createAdopcionesTable = """
+                CREATE TABLE IF NOT EXISTS adopciones (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    numero_adopcion VARCHAR(50) UNIQUE NOT NULL,
+                    empleado_id INT NOT NULL,
+                    adoptante_id INT NOT NULL,
+                    mascota_id INT NOT NULL,
+                    fecha_hora TIMESTAMP NOT NULL,
+                    FOREIGN KEY (empleado_id) REFERENCES empleados(id),
+                    FOREIGN KEY (adoptante_id) REFERENCES adoptantes(id),
+                    FOREIGN KEY (mascota_id) REFERENCES mascotas(id)
+                )
+            """;
+            stmt.execute(createAdopcionesTable);
 
             System.out.println("Tablas inicializadas correctamente");
 

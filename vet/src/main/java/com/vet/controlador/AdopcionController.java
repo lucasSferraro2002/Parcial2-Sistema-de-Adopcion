@@ -27,24 +27,89 @@ public class AdopcionController {
         this.formato = new SimpleDateFormat("dd/MM/yyyy");
     }
 
-    // Registra una adopción completa
-
+    /**
+     * Registra una adopción completa
+     * 1. Guarda el adoptante en la BD
+     * 2. Guarda la mascota en la BD
+     * 3. Guarda la adopción en la BD
+     * @return La adopción registrada o null si hubo error
+     */
     public Adopcion registrarAdopcion(String nombreAdoptante, int edad, String direccion,
                                       String nombreMascota, String especie, Date fechaNacimiento,
                                       double peso, String atributoEspecial) {
 
-        Adoptante adoptante = new Adoptante(nombreAdoptante, edad, direccion);
+        try {
+            // Verificar que hay un empleado logueado
+            Empleado empleadoLogueado = Empleado.getInstanciaLogueada();
 
-        Mascota mascota = crearMascota(especie, nombreMascota, fechaNacimiento, peso, atributoEspecial);
+            if (empleadoLogueado == null) {
+                System.err.println("ERROR CRÍTICO: No hay empleado logueado");
+                return null;
+            }
 
-        Empleado empleadoLogueado = Empleado.getInstanciaLogueada();
-        Adopcion adopcion = new Adopcion(empleadoLogueado, adoptante, mascota);
+            System.out.println("=== INICIANDO REGISTRO DE ADOPCIÓN ===");
+            System.out.println("Empleado: " + empleadoLogueado.obtenerNombreCompleto() + " (ID: " + empleadoLogueado.getId() + ")");
 
-        return null;
+            // 1. Crear y guardar el adoptante
+            Adoptante adoptante = new Adoptante(nombreAdoptante, edad, direccion);
+            boolean adoptanteGuardado = adoptanteDAO.crear(adoptante);
+
+            if (!adoptanteGuardado) {
+                System.err.println("ERROR: No se pudo guardar el adoptante");
+                return null;
+            }
+
+            System.out.println("✓ Adoptante guardado con ID: " + adoptante.getId());
+
+            // 2. Crear y guardar la mascota
+            Mascota mascota = crearMascota(especie, nombreMascota, fechaNacimiento, peso, atributoEspecial);
+
+            if (mascota == null) {
+                System.err.println("ERROR: No se pudo crear la mascota");
+                return null;
+            }
+
+            boolean mascotaGuardada = mascotaDAO.crear(mascota);
+
+            if (!mascotaGuardada) {
+                System.err.println("ERROR: No se pudo guardar la mascota");
+                return null;
+            }
+
+            System.out.println("✓ Mascota guardada con ID: " + mascota.getId());
+
+            // 3. Crear y guardar la adopción
+            Adopcion adopcion = new Adopcion(empleadoLogueado, adoptante, mascota);
+
+            System.out.println("Creando adopción con número: " + adopcion.getNumeroAdopcion());
+            System.out.println("  - Empleado ID: " + empleadoLogueado.getId());
+            System.out.println("  - Adoptante ID: " + adoptante.getId());
+            System.out.println("  - Mascota ID: " + mascota.getId());
+
+            boolean adopcionGuardada = adopcionDAO.crear(adopcion);
+
+            if (!adopcionGuardada) {
+                System.err.println("ERROR: No se pudo guardar la adopción en la base de datos");
+                return null;
+            }
+
+            System.out.println("✓ Adopción registrada exitosamente!");
+            System.out.println("  - ID de adopción: " + adopcion.getId());
+            System.out.println("  - Número de adopción: " + adopcion.getNumeroAdopcion());
+            System.out.println("=== FIN REGISTRO ===\n");
+
+            return adopcion;
+
+        } catch (Exception e) {
+            System.err.println("ERROR GENERAL al registrar la adopción: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
     }
 
-    // Crea una mascota según la especie
-
+    /**
+     * Crea una mascota según la especie
+     */
     private Mascota crearMascota(String especie, String nombre, Date fechaNacimiento,
                                  double peso, String atributoEspecial) {
         switch (especie) {
@@ -57,12 +122,14 @@ public class AdopcionController {
             case "Ave":
                 return new Ave(nombre, fechaNacimiento, peso, atributoEspecial);
             default:
+                System.err.println("Especie desconocida: " + especie);
                 return null;
         }
     }
 
-    // Obtiene las recomendaciones de cuidado según la especie
-
+    /**
+     * Obtiene las recomendaciones de cuidado según la especie
+     */
     public String obtenerRecomendacionesCuidado(String especie) {
         switch (especie) {
             case "Perro":
@@ -98,7 +165,7 @@ public class AdopcionController {
         }
     }
 
-    // Validaciones
+    // ========== VALIDACIONES ==========
 
     public boolean validarNombreAdoptante(String nombre) {
         return nombre != null && !nombre.trim().isEmpty() && !nombre.matches(".*\\d.*");

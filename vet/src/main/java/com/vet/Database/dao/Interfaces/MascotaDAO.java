@@ -2,9 +2,7 @@ package com.vet.Database.dao.Interfaces;
 
 import com.vet.modelo.Mascotas.Mascota;
 
-/**
- * Interfaz DAO para Mascota
- */
+
 public interface MascotaDAO {
 
     boolean crear(Mascota mascota);

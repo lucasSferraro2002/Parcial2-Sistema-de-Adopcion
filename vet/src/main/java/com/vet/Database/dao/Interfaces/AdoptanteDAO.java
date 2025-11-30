@@ -2,9 +2,7 @@ package com.vet.Database.dao.Interfaces;
 
 import com.vet.modelo.Adoptante;
 
-/**
- * Interfaz DAO para Adoptante
- */
+
 public interface AdoptanteDAO {
 
     boolean crear(Adoptante adoptante);
